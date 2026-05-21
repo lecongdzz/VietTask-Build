@@ -20,18 +20,17 @@ jobs:
           pip install --upgrade pip
           pip install buildozer cython virtualenv
 
-      - name: Pre-accept Android Licenses
+      - name: Fix Android Licenses and Build APK
         run: |
-          # Tạo sẵn thư mục licenses và tự động ký chấp thuận điều khoản chuẩn Google
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
-          mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-          echo -e "\n244d2d25b4131656d01757947d33d70e2a9d16e7" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
-          echo -e "\n84831b9409646a547e31e9ebd735cdb597d904c7" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-preview-license
-
-      - name: Build APK with Buildozer
-        run: |
-          # Chạy thẳng, hệ thống đã được nạp sẵn License ở bước trên
+          # 1. Khởi tạo buildozer trước để nó tự đẻ ra thư mục android-sdk gốc
+          buildozer android status || true
+          
+          # 2. Dùng chính bộ sdkmanager của hệ thống để tự động ký chấp thuận mọi license
+          if [ -d "$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin" ]; then
+            yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
+          fi
+          
+          # 3. Đúc app trực tiếp, bao qua chốt kiểm tra
           buildozer -v android debug
 
       - name: Upload APK Product
