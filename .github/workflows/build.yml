@@ -3,35 +3,29 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Install Buildozer and Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y git zip unzip openjdk-17-jdk bsdmainutils triggerhappy libstdc++6 Autoconf libtool pkg-config zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev
+          sudo apt-get install -y build-essential ccache git ffmpeg libgstreamer1.0-dev gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly gstreamer1.0-libav libgstreamer-plugins-base1.0-dev libasound2-dev libsqlite3-dev uuid-dev libssl-dev libffi-dev libgmp3-dev libvlc-dev libmtdev-dev inputproto-dev libx14-dev libxext-dev libxfixes-dev libxi-dev libxrandr-dev libxrender-dev libxkbcommon-dev libxkbcommon-x11-dev libvdpau-dev libva-dev libpango1.0-dev libgdk-pixbuf2.0-dev
+          sudo apt-get install -y openjdk-17-jdk unzip zip
           pip install --upgrade pip
           pip install buildozer cython virtualenv
 
-      - name: Auto Accept Android Licenses
-        run: |
-          mkdir -p ~/.android
-          touch ~/.android/repositories.cfg
-          # Tự động đồng ý tất cả điều khoản SDK của Google để không bị dừng tiến trình
-          yes | buildozer android licenses || true
-
       - name: Build APK with Buildozer
         run: |
-          # Ép chạy không dùng quyền root tuyệt đối để Buildozer không từ chối
           buildozer -v android debug
 
-      - name: Upload APK Thanh Pham
+      - name: Upload APK Product
         uses: actions/upload-artifact@v4
         with:
           name: VietTask-Automation-APK
