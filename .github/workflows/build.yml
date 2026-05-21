@@ -22,8 +22,8 @@ jobs:
 
       - name: Build APK with Buildozer
         run: |
-          # Tự động đồng ý mọi điều khoản điều kiện của Google SDK khi đúc app
-          yes | buildozer -v android debug
+          # Chạy thẳng trực tiếp, thằng Buildozer trên GitHub tự động chấp nhận SDK
+          buildozer -v android debug
 
       - name: Upload APK Product
         uses: actions/upload-artifact@v4
