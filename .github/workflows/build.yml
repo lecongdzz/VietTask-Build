@@ -3,35 +3,16 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Build with Buildozer
+        uses: ArtemGovorov/buildozer-action@v1
         with:
-          python-version: '3.10'
-
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential ccache git openjdk-17-jdk unzip zip zlib1g-dev libffi-dev libssl-dev
-          pip install --upgrade pip
-          pip install buildozer cython virtualenv
-
-      - name: Fix Android Licenses and Build APK
-        run: |
-          # 1. Khởi tạo buildozer trước để nó tự đẻ ra thư mục android-sdk gốc
-          buildozer android status || true
-          
-          # 2. Dùng chính bộ sdkmanager của hệ thống để tự động ký chấp thuận mọi license
-          if [ -d "$HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin" ]; then
-            yes | $HOME/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          fi
-          
-          # 3. Đúc app trực tiếp, bao qua chốt kiểm tra
-          buildozer -v android debug
+          command: buildozer -v android debug
+          repository_root: .
 
       - name: Upload APK Product
         uses: actions/upload-artifact@v4
